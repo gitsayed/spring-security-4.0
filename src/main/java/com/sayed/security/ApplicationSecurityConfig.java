@@ -1,6 +1,7 @@
 package com.sayed.security;
 
 
+import com.sayed.dto.RolePermission;
 import com.sayed.dto.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -28,8 +29,8 @@ public class ApplicationSecurityConfig {
                                 "/index",
                                 "/css/*",
                                 "/js/*").permitAll()
-                        .requestMatchers("/employee").hasRole(UserRole.EMP.name())
-                        .requestMatchers("/management").hasRole(UserRole.ADMIN.name())
+                        .requestMatchers("/employee").hasAllAuthorities(RolePermission.EMP_READ.getPermission(), RolePermission.EMP_WRITE.getPermission())
+                        .requestMatchers("/management").hasAllAuthorities(RolePermission.COURSE_READ.getPermission(), RolePermission.COURSE_WRITE.getPermission())
                         .anyRequest().authenticated())
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults());
@@ -40,13 +41,19 @@ public class ApplicationSecurityConfig {
     protected UserDetailsService userDetailsService() {
         UserDetails admin =  User.builder().username("admin")
                 .password(passwordEncoder().encode("admin"))
-                .roles(UserRole.ADMIN.name()).build();
+//                .roles(UserRole.ADMIN.name())
+                .authorities(UserRole.ADMIN.getGrantedAuthorities())
+                .build();
         UserDetails akib =  User.builder().username("akib")
                 .password(passwordEncoder().encode("akib1"))
-                .roles(UserRole.EMP.name()).build();
+//                .roles(UserRole.EMP.name())
+                .authorities(UserRole.EMP.getGrantedAuthorities())
+                .build();
         UserDetails sakib =  User.builder().username("sakib")
                 .password(passwordEncoder().encode("sakib1"))
-                .roles(UserRole.EMP.name()).build();
+                .roles(UserRole.EMP.name())
+                .authorities(UserRole.EMP.getGrantedAuthorities())
+                .build();
         return new InMemoryUserDetailsManager(admin,  akib, sakib);
     }
 

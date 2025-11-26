@@ -2,15 +2,19 @@ package com.sayed.dto;
 
 
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 public enum UserRole {
 
-    EMP(new HashSet()),
-    ADMIN(new HashSet(Arrays.asList(RolePermission.COURSE_READ, RolePermission.COURSE_WRITE, RolePermission.EMP_READ, RolePermission.EMP_WRITE)));
+    EMP(new HashSet(Arrays.asList(RolePermission.EMP_READ, RolePermission.EMP_WRITE))),
+    ADMIN(new HashSet(Arrays.asList(RolePermission.COURSE_READ, RolePermission.COURSE_WRITE)));
 
 
     private final Set<RolePermission> permissions;
@@ -23,5 +27,10 @@ public enum UserRole {
         return permissions;
     }
 
+    public Set<GrantedAuthority>   getGrantedAuthorities() {
+        return getPermissions().stream()
+                .map(permission-> new SimpleGrantedAuthority(permission.getPermission()))
+                .collect(Collectors.toSet());
+    }
 
 }
