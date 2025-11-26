@@ -20,4 +20,5 @@ public class Employee {
     Integer age;
     String email;
     String mobileNo;
+    String role;
 }
