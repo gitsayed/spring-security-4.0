@@ -6,10 +6,7 @@ import com.sayed.dto.EmployeeDao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 
 @Slf4j
@@ -27,7 +24,7 @@ public class EmployeeController {
     }
 
 
-    @PreAuthorize("hasAuthority('emp:read')")
+
     @GetMapping("/{id}")
     public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
         log.info("getEmployeeById : {}", id);
@@ -39,7 +36,7 @@ public class EmployeeController {
         return ResponseEntity.ok(employee);
     }
 
-    @PreAuthorize("hasAuthority('emp:write')")
+
     @PostMapping("/{id}")
     public ResponseEntity<Void> addEmployeeById(@PathVariable Long id,
                                                     @RequestBody Employee employee) {
