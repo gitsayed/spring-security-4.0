@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
 public enum UserRole {
 
     EMP(new HashSet(Arrays.asList(RolePermission.EMP_READ, RolePermission.EMP_WRITE))),
-    ADMIN(new HashSet(Arrays.asList(RolePermission.COURSE_READ, RolePermission.COURSE_WRITE)));
-
+    ADMIN(new HashSet(Arrays.asList(RolePermission.COURSE_READ, RolePermission.COURSE_WRITE))),
+    TRAINEE(new HashSet(Arrays.asList(RolePermission.COURSE_READ, RolePermission.EMP_READ)));
 
     private final Set<RolePermission> permissions;
 
