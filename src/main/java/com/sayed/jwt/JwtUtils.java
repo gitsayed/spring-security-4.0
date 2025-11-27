@@ -27,10 +27,10 @@ public class JwtUtils {
         claims.put("roles", roles);
         claims.put("permissions", authorities.stream().map(GrantedAuthority::getAuthority).toList());
         return Jwts.builder()
-                .setSubject((user.getUsername()))
-                .setIssuedAt(new Date())
                 .setClaims(claims)
-                .setExpiration(new Date((new Date()).getTime() + jwtConfig.getAccessTokenExpirationMinutes()))
+                .setSubject(user.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + (60 * 1000 * jwtConfig.getAccessTokenExpirationMinutes())))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
