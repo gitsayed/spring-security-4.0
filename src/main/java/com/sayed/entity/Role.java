@@ -1,7 +1,6 @@
 package com.sayed.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,7 +27,7 @@ public class Role {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "a_role_permissions",
+            name = "A_ROLE_PERMISSIONS",
             joinColumns = @JoinColumn(name = "role_id"),
             inverseJoinColumns = @JoinColumn(name = "permission_id")
     )

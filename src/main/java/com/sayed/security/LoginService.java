@@ -3,9 +3,14 @@ package com.sayed.security;
 
 import com.sayed.dto.LoginRequestDto;
 import com.sayed.dto.LoginResponseDto;
+import com.sayed.dto.RegisterRequestDto;
 import com.sayed.entity.AppUser;
+import com.sayed.entity.Role;
+import com.sayed.exception.OrgException;
 import com.sayed.jwt.JwtUtils;
 import com.sayed.repository.AppUserRepository;
+import com.sayed.repository.RoleRepository;
+import com.sayed.utils.AcStatus;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
@@ -19,11 +24,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -31,13 +34,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class LoginService {
 
-    private final AppUserRepository appUserRepository;
+
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
+    private final AppUserRepository appUserRepository;
+    private final RoleRepository roleRepository;
 
     public LoginResponseDto doLogin(LoginRequestDto request) {
         AppUser user = getUser(request.getUsername());
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword() )) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Bad credentials");
         }
 
@@ -55,11 +60,38 @@ public class LoginService {
         generateAuthentication(user);
     }
 
-    private MetaAuthorities  generateAuthentication(AppUser user){
+
+    @Transactional
+    public AppUser registerUser(RegisterRequestDto request) {
+        try {
+            Optional<AppUser> opUser = appUserRepository.findTop1ByUsernameOrEmailOrMobileNo(request.getUsername(), request.getEmail(), request.getMobileNo());
+            if (opUser.isPresent()) {
+                throw new OrgException("User already exists!");
+            }
+            List<Role> rolesList = roleRepository.findByIdIn(request.getRoleIds());
+            AppUser user = new AppUser();
+            user.setUsername(request.getUsername())
+                    .setEmail(request.getEmail())
+                    .setMobileNo(request.getMobileNo())
+                    .setStatus(AcStatus.ACTIVE)
+                    .setRoles(rolesList)
+                    .setPassword(passwordEncoder.encode(request.getPassword()));
+
+            user = appUserRepository.save(user);
+            log.info("User: {} has been registered successfully", user.getId());
+
+            return user;
+        } catch (Exception e) {
+            log.error("User registration error: {}", e.getMessage());
+            throw new OrgException("User registration error: "+ e.getMessage());
+        }
+    }
+
+    private MetaAuthorities generateAuthentication(AppUser user) {
         List<String> roles = new ArrayList<>();
         Set<GrantedAuthority> authorities = new HashSet<>();
 
-        user.getRoles().stream().forEach(role -> {
+        user.getRoles().forEach(role -> {
             Set<SimpleGrantedAuthority> permissions = role.getPermissions().stream()
                     .map(permission -> new SimpleGrantedAuthority(permission.getName()))
                     .collect(Collectors.toSet());
@@ -71,22 +103,22 @@ public class LoginService {
         Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUsername(), null, authorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        MetaAuthorities  metaAuthorities = new MetaAuthorities();
+        MetaAuthorities metaAuthorities = new MetaAuthorities();
         metaAuthorities.setRoles(roles)
-        .setAuthorities(authorities);
+                .setAuthorities(authorities);
         return metaAuthorities;
     }
 
     private AppUser getUser(String username) {
-        return appUserRepository.findTop1ByUsernameOrEmail(username, username)
+        return appUserRepository.findTop1ByUsernameOrEmailOrMobileNo(username, username, username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found by username: " + username));
     }
 
     @Data
     @Accessors(chain = true)
-    class MetaAuthorities{
+    static class MetaAuthorities {
         private List<String> roles;
-        private  Set<GrantedAuthority> authorities;
+        private Set<GrantedAuthority> authorities;
 
     }
 

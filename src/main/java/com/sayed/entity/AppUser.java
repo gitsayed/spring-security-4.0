@@ -1,6 +1,7 @@
 package com.sayed.entity;
 
 
+import com.sayed.utils.AcStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,13 +31,15 @@ public class AppUser {
     private Integer age;
     @Column(unique = true)
     private String mobileNo;
-    private String status;
+
+    @Enumerated(EnumType.STRING)
+    private AcStatus status;
     private String dept;
     private String joiningDate;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "a_user_roles",
+            name = "A_USER_ROLES",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
