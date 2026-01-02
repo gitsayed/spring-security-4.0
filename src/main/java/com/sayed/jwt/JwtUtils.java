@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -22,6 +21,7 @@ public class JwtUtils {
     private final JwtConfig jwtConfig;
 
     public String generateJwtToken(AppUser user, List<String> roles, Set<GrantedAuthority> authorities) {
+        Long perMinute = (60L * 1000L);
         Key secretKey = Keys.hmacShaKeyFor(jwtConfig.getSecretKey().getBytes());
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", roles);
@@ -30,7 +30,7 @@ public class JwtUtils {
                 .setClaims(claims)
                 .setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + (60 * 1000 * jwtConfig.getAccessTokenExpirationMinutes())))
+                .setExpiration(new Date(System.currentTimeMillis() + (perMinute * jwtConfig.getAccessTokenExpirationMinutes())))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }

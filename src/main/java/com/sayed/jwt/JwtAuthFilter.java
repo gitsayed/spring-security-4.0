@@ -25,14 +25,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-           log.info("doFilterInternal --> jwt: {} ");
-            String jwt = parseJwt(request);
 
-            if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-                String username = jwtUtils.getUsernameFromJwtToken(jwt);
-                if(StringUtils.isEmpty(username)) throw new UsernameNotFoundException("Username not found");
-                loginService.doAuthenticated(username);
-            }
+        String jwt = parseJwt(request);
+        log.info("doFilterInternal --> jwt: {} ", jwt);
+        if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+            String username = jwtUtils.getUsernameFromJwtToken(jwt);
+            if (username == null) throw new UsernameNotFoundException("Username not found");
+            loginService.doAuthenticated(username);
+        }
 
         filterChain.doFilter(request, response);
     }

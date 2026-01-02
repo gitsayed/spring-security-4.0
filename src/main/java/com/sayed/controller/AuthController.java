@@ -1,11 +1,9 @@
 package com.sayed.controller;
 
 
-import com.sayed.dto.Employee;
 import com.sayed.dto.LoginRequestDto;
 import com.sayed.dto.LoginResponseDto;
 import com.sayed.dto.RegisterRequestDto;
-import com.sayed.jwt.JwtConfig;
 import com.sayed.security.LoginService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/v1/auth/")
 @RestController
 @RequiredArgsConstructor
 public class AuthController {

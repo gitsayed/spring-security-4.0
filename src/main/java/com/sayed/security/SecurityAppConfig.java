@@ -1,6 +1,7 @@
 package com.sayed.security;
 
 
+import com.sayed.jwt.AuthEntryPointJwt;
 import com.sayed.jwt.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -18,44 +19,26 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityAppConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final AuthEntryPointJwt authEntryPointJwt;
 
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http.csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/",
                                 "/api/v1/auth/**",
-                                "/index",
-                                "/css/*",
-                                "/js/*").permitAll()
+                                "/api/v1/auth/*" ).permitAll()
                         .anyRequest().authenticated())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);;
+                .exceptionHandling(exception ->
+                        exception.authenticationEntryPoint(authEntryPointJwt))
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-
-
-/*
-    // Default config written in the system
-    @Configurati on(
-            proxyBeanMethods = false
-    )
-    @ConditionalOnDefaultWebSecurity
-    static class SecurityFilterChainConfiguration {
-        @Bean
-        @Order(2147483642)
-        SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) {
-            http.authorizeHttpRequests((requests) -> ((AuthorizeHttpRequestsConfigurer.AuthorizedUrl)requests.anyRequest()).authenticated());
-            http.formLogin(Customizer.withDefaults());
-            http.httpBasic(Customizer.withDefaults());
-            return (SecurityFilterChain)http.build();
-        }
-    }
-
- */
 
 
 }
